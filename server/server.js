@@ -16,14 +16,13 @@ io.on('connection', (socket) => {
   console.log('New client connected');
 
   socket.on('createMessage', function(message) {
-    message['createAt'] = new Date().getTime();
     console.log('createMessage:', message);
-  });
-
-  socket.emit('newMessage', {
-    from: 'Menghua',
-    text: 'Hi, this is Menghua',
-    createAt: new Date().getTime()
+    // prodcast message to all connected clients
+    io.emit('newMessage', {
+      from: message.from,
+      text: message.text,
+      createAt: new Date().getTime()
+    });
   });
 
   socket.on('disconnect', () => {
