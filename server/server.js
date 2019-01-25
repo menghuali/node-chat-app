@@ -24,11 +24,11 @@ io.on('connection', (socket) => {
     'newMessage', generateMessage('admin', 'New user joined'));
 
   // listen to the certian type of events
-  socket.on('createMessage', function(message) {
+  socket.on('createMessage', function(message, callback) {
     console.log('createMessage:', message);
-
     // send message to all connected clients
     io.emit('newMessage', generateMessage(message.from, message.text));
+    callback('This is from the server');
   });
 
   socket.on('disconnect', () => {
