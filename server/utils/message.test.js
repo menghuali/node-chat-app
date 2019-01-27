@@ -7,7 +7,7 @@ describe('generateMessage', () => {
     var text = 'Hello';
     var message = generateMessage(from, text);
     expect(message).toMatchObject({from, text});
-    expect(typeof message.createAt).toBe('number');
+    expect(typeof message.createdAt).toBe('number');
   });
 });
 
@@ -19,6 +19,6 @@ describe('generateLocationMessage', () => {
     var url = `https://www.google.com/maps?q=${latitude},${longitude}`;
     var message = generateLocationMessage(from, latitude, longitude);
     expect(message).toMatchObject({from, url});
-    expect(typeof message.createAt).toBe('number');
+    expect(typeof message.createdAt).toBe('number');
   });
 });
