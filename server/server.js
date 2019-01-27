@@ -5,6 +5,7 @@ const socketIO = require('socket.io');
 const port = process.env.PORT || 3000;
 const {generateMessage, generateLocationMessage} = require('./utils/message');
 const publicPath = path.join(__dirname, '..', 'public');
+const {isRealString} = require('./utils/validation');
 
 var app = new express();
 var server = http.createServer(app);
@@ -22,6 +23,13 @@ io.on('connection', (socket) => {
   // Send message to all clients except the current one
   socket.broadcast.emit(
     'newMessage', generateMessage('admin', 'New user joined'));
+
+  socket.on('join', function(params, callback) {
+    if (!isRealString(params.name) || !isRealString(params.room)) {
+      callback('Name and room are required');
+    }
+    callback();
+  });
 
   // listen to the certian type of events
   socket.on('createMessage', function(message, callback) {
