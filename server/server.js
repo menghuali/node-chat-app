@@ -6,21 +6,27 @@ const port = process.env.PORT || 3000;
 const {generateMessage, generateLocationMessage} = require('./utils/message');
 const publicPath = path.join(__dirname, '..', 'public');
 const {isRealString} = require('./utils/validation');
+const {Users} = require('./utils/users');
 
 var app = new express();
 var server = http.createServer(app);
 var io = socketIO(server);
+var users = new Users();
 
 app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
-  console.log('New client connected');
-
   socket.on('join', function(params, callback) {
     if (!isRealString(params.name) || !isRealString(params.room)) {
       callback('Name and room are required');
     }
+
     socket.join(params.room);
+    users.removeUser(socket.id);
+    users.addUser(socket.id, params.name, params.room);
+    // Notify the updated user list of the current room
+    io.to(params.room).emit('updateUserLis', users.getUserList(params.room));
+
     // socket.leave(params.room);
     // Send the message to the current client
     socket.emit(
@@ -45,7 +51,11 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('Disconnected from client');
+    var user = users.removeUser(socket.id);
+    if (user) {
+      io.to(user.room).emit('updateUserList', users.getUserList(user.room));
+      io.to(user.room).emit('newMessage', generateMessage('admin', `${user.name} has left`));
+    }
   });
 });
 
