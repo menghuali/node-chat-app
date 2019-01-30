@@ -16,24 +16,25 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
   console.log('New client connected');
 
-  // Send the message to the current client
-  socket.emit(
-    'newMessage', generateMessage('admin', 'Welcome to the chat app'));
-
-  // Send message to all clients except the current one
-  socket.broadcast.emit(
-    'newMessage', generateMessage('admin', 'New user joined'));
-
   socket.on('join', function(params, callback) {
     if (!isRealString(params.name) || !isRealString(params.room)) {
       callback('Name and room are required');
     }
+    socket.join(params.room);
+    // socket.leave(params.room);
+    // Send the message to the current client
+    socket.emit(
+      'newMessage', generateMessage('admin', 'Welcome to the chat app'));
+
+    // Send message to all clients except the current one
+    socket.broadcast.to(params.room).emit(
+      'newMessage', generateMessage('admin', `${params.name} just joined.`));
+
     callback();
   });
 
   // listen to the certian type of events
   socket.on('createMessage', function(message, callback) {
-    console.log('createMessage:', message);
     // send message to all connected clients
     io.emit('newMessage', generateMessage(message.from, message.text));
     callback();
